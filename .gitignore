@@ -1,4 +1,5 @@
 **/google_token.txt
+**/mapbox_token.txt
 *_checkpoints/*
 **/.ipynb_checkpoints/*
 **/__pycache__/*

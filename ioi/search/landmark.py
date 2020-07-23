@@ -11,6 +11,7 @@ def PointsInCircum(r,n=100):
     pi = math.pi
     return [(math.cos(2*pi/n*x)*r,math.sin(2*pi/n*x)*r) for x in range(0,n+1)]
 
+
 def generate_circle(centre_latlng, r, color = "#050e6e"):
     deg = r/110.574
     pts = PointsInCircum(deg)
