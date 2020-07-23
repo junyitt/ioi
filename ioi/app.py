@@ -45,6 +45,8 @@ st.title('Property Search')
 ###################### SIDE BAR ######################
 
 prop_num = st.sidebar.slider(label='Number of comparison', min_value=1, max_value=5, value=1, step=1)
+radius = st.sidebar.slider(label='Proximity radius', min_value=1, max_value=50, value=2, step=1)
+
 # st.text_input()
 prop_name={}
 for i in range(prop_num):
@@ -58,43 +60,20 @@ if st.sidebar.button('Show Facts Comparison'):
 search_term = []
 for i in range(prop_num):
     if prop_name[i]:
-        st.write(prop_name[i])
         search_term.append(prop_name[i])
         
-# g = gLandmark(search_term = [prop_name[i]+', malaysia'], r = 2)   
-    
-    
-
-fig = go.Figure(
-    go.Scattermapbox(
-        mode = "lines", fill = "toself",
-        lat = generate_circle((30,30),3)['lat'].to_list(),
-        lon = generate_circle((30,30),3)['lng'].to_list(),
-    )
-)
-
-fig.update_layout(
-    title='Nuclear Waste Sites on Campus',
-    autosize=True,
-    width=1200,
-    height=800,
-    
-    hovermode='closest',
-    showlegend=True,
-    mapbox=dict(
-        accesstoken=mapbox_access_token,
-        bearing=0,
-        center=dict(
-            lat=30,
-            lon=30
-        ),
-        pitch=0,
-        zoom=12,
-    ),
-)
-
-st.plotly_chart(fig)
-
+if len(search_term) > 0:
+    st.write("Searching for: {}".format(", ".join(search_term)))
+        
+try:
+    g = gLandmark(search_term = [s for s in search_term], r = radius)   
+    fig = g.plot()
+    st.plotly_chart(fig)
+except Exception as err:
+    if len(search_term) > 0:
+        st.write("Error searching for: {}".format(", ".join(search_term)))
+    print(err)
+    ""
 ###############################################
 
 

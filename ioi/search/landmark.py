@@ -12,10 +12,11 @@ def PointsInCircum(r,n=100):
     return [(math.cos(2*pi/n*x)*r,math.sin(2*pi/n*x)*r) for x in range(0,n+1)]
 
 
-def generate_circle(centre_latlng, r, color = "#050e6e"):
+def generate_circle(centre_latlng, r, color = "#050e6e", category = "area"):
     deg = r/110.574
     pts = PointsInCircum(deg)
-    new_pts = [{"color": color, "address_short": "", "size": 0.3, "category": "radi", "lat": j[1] + centre_latlng[0], "lng": j[0] + centre_latlng[1]} for j in pts]
+    new_pts = [{"color": color, "address_short": "", "size": 0.3, 
+                "category": category, "lat": j[1] + centre_latlng[0], "lng": j[0] + centre_latlng[1]} for j in pts]
     df2 = pd.DataFrame(new_pts)
     return df2
 
@@ -27,7 +28,9 @@ def get_bbox(centre_latlng, r):
     return x
 
 class Landmark():
-    POI_SEARCH_TERMS = ["mall", "lrt", "park", "coffee", "restaurant"]
+    ST_COLORS = ["#FC1520", "#FFC414", "#37ED00", "#4089FC", "#E028EF"]*100
+    POI_SEARCH_TERMS = ["mrt", "lrt", "park", "mall", "coffee", "restaurant"]
+    POI_COLORS = ["#EF6B5F", "#FC864B", "#2ABF86", "#08B8DB", "#7E6A52", "#BC7756"]
     
     def __init__(self, search_term, r, initial_latlng = [3.1390, 101.6869]):
         #         search_term = '3 two square' # condominium/properties name
@@ -39,17 +42,18 @@ class Landmark():
         
         if not isinstance(search_term, list):
             search_term = [search_term]
-            
+        
+        N = len(search_term)
+        st_colors = self.ST_COLORS[:N]
         fdf_list = [] 
-        for st in search_term:
-            x, latlng = self.get_search_data(st, key, initial_latlng, size = 10, color = "#ff0011") # get landmark data for search_term
-
+        for st, st_cl in zip(search_term, st_colors):
+            x, latlng = self.get_search_data(st, key, initial_latlng, size = 10, color = st_cl) # get landmark data for search_term
             bbox = get_bbox(latlng, r)
-            circle_df = generate_circle(latlng, r+0.5)
+            circle_df = generate_circle(latlng, r+0.5, st_colors, "area: "+st)
 
             df_list = []
-            for s in self.POI_SEARCH_TERMS: # get landmark data for all POI
-                landmarks = self.search(s, latlng, r, key, size = 1, color = "#001111")
+            for s, cl in zip(self.POI_SEARCH_TERMS, self.POI_COLORS): # get landmark data for all POI
+                landmarks = self.search(s, latlng, r, key, size = 1, color = cl)
                 df = pd.DataFrame(landmarks)
                 df_list.append(df)
             df_list.append(pd.DataFrame(x))
@@ -63,11 +67,11 @@ class Landmark():
         self.mb_key = mb_key
         
     def read_key(self):
-        key = open(".mapbox_token").read()
+        key = open("mapbox_token.txt").read()
         return key
     
     def read_mapbox_token(self):
-        mb_key = open(".mapbox_token").read()
+        mb_key = open("mapbox_token.txt").read()
         return mb_key
     
     def search(self, search_term, latlng, r, key, size, color):
@@ -88,37 +92,30 @@ class Landmark():
         return res[0:1], latlng
     
     def plot(self):
-#         cm = {}
-#         cg1 = ["mall", "lrt", "park", "coffee", "restaurant"]
-#         cc1 = ["#f9ed69", "#355c7d", "#b83b5e", "#a8e6cf", "#d4a5a5", "#b8b0b0"]
-#         for i in range(5):
-#            cm[cg1[i]]=cc1[i]
+        fdf = self.fdf
+        mapbox_access_token = self.mb_key
+        latlng = self.latlng
         
-       
-#         cc2 = ["#071a52", "#086972", "#17b978", "#a7ff83"]
-#         cc = cc[:n]
-#         color_discrete_map = {j:k  for j,k in zip(cats, cc)}
-        fig = px.scatter_mapbox(self.fdf, lat="lat", lon="lng", 
-                                color="category", size="size",
-                                symbol = "aquarium",
-#                                 color_discrete_map = color_discrete_map,
+        fig = px.scatter_mapbox(fdf, lat="lat", lon="lng", 
+                                color="category", size = "size",
                                 size_max=25, zoom=20, 
                                 text="address_short")
+
         fig.update_layout(
             autosize=True,
             hovermode='closest',
             mapbox=dict(
-                accesstoken=self.mb_key,
+                accesstoken=mapbox_access_token,
                 bearing=0,
                 center=dict(
-                    lat=self.latlng[0],
-                    lon=self.latlng[1]
+                    lat=latlng[0],
+                    lon=latlng[1]
                 ),
                 pitch=0,
                 zoom=12
             ),
         )
-        
+
         return fig
 
         ## SAVE
