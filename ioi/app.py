@@ -44,13 +44,18 @@ st.title('Property Search')
 
 ###################### SIDE BAR ######################
 
-prop_num = st.sidebar.slider(label='Number of comparison', min_value=1, max_value=5, value=1, step=1)
-radius = st.sidebar.slider(label='Proximity radius', min_value=1, max_value=50, value=2, step=1)
+prop_num = st.sidebar.slider(label='Number of comparison', min_value=1, max_value=5, value=2, step=1)
+radius = st.sidebar.slider(label='Proximity radius', min_value=1, max_value=20, value=3, step=1)
 
 # st.text_input()
+suggestions = ["PJ Midtown", "121 Residences", "Ryan & Miho", "Lumi Tropicana"]
 prop_name={}
 for i in range(prop_num):
-    prop_name[i] = st.sidebar.text_input(label=f'Property {i+1}', key= i)
+    if i < 1:
+        prop_name[i] = st.sidebar.text_input(value="",label=f'Property {i+1}', key=i)
+    else:
+        print(suggestions[i-1])
+        prop_name[i] = st.sidebar.text_input(value=suggestions[i-1], label=f'Property {i+1}', key=i)
 
 if st.sidebar.button('Show Facts Comparison'):
     #DO SOMETHING
@@ -67,7 +72,7 @@ if len(search_term) > 0:
         
 try:
     g = gLandmark(search_term = [s for s in search_term], r = radius)   
-    fig = g.plot()
+    fig = g.plot2()
     st.plotly_chart(fig)
 except Exception as err:
     if len(search_term) > 0:
