@@ -1,1 +1,4 @@
+**/google_token.txt
 *_checkpoints/*
+**/.ipynb_checkpoints/*
+**/__pycache__/*
