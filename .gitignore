@@ -4,3 +4,6 @@
 **/.ipynb_checkpoints/*
 **/__pycache__/*
 env/
+**.html
+**.txt
+**.ipynb
