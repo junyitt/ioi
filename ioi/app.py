@@ -23,7 +23,7 @@ def match_input(text):
     if len(lookup)>0:
         return lookup[0].title()
     else:
-        st.write('Print provide more concise property name')
+        st.write(f'No match found for {text}. Print provide more concise property name')
         return None
 
 df = read_data('condo.csv')
@@ -69,39 +69,38 @@ suggestions = ["162 residency", "Selayang Makmur Apartment", "", "", ""]
 prop_name={}
 user_input={}
 for i in range(prop_num):
-#     if i < 1:
     user_input[i] = st.sidebar.text_input(value=suggestions[i], label=f'Property {i+1}', key=i)
+    prop_name[i]=None
     if user_input[i]:
         match = match_input(user_input[i])
         if match:
             region = df['region'][df['PropName']==match].iloc[0]
             prop_name[i] = ' '.join([match, region])
-#     else:
-#         user_input[i] = st.sidebar.text_input(value=suggestions[i], label=f'Property {i+1}', key=i)
-#         match = match_input(user_input[i])
-#         region = df['region'][df['PropName']==match].iloc[0]
-#         prop_name[i] = ' '.join([match, region])
-        
 if st.sidebar.button('Show Facts Comparison'):
     #DO SOMETHING
     pass
 
 ##################### MAIN FRAME #####################
+@st.cache(suppress_st_warning=True)
+def plot_map(search_term):
+    try:
+        g = gLandmark(search_term = [s for s in search_term], r = radius)   
+        fig = g.plot2()
+        return fig
+    except:
+        return None
+
 search_term = []
 for i in range(prop_num):
-    if user_input[i]:
+    if prop_name[i]:
         search_term.append(prop_name[i])
         
 if len(search_term) > 0:
     st.write("Searching for: {}".format(", ".join(search_term)))
-        
-try:
-    g = gLandmark(search_term = [s for s in search_term], r = radius)   
-    fig = g.plot2()
+
+fig = plot_map(search_term)
+if fig:
     st.plotly_chart(fig)
-except Exception as err:
-    if len(search_term) > 0:
-        st.write("Error searching for: {}".format(", ".join(search_term)))
-    print(err)
-    ""
+else:
+    st.write("Error searching for: {}".format(", ".join(search_term)))
 ###############################################
