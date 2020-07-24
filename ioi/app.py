@@ -103,8 +103,9 @@ if show_checkbox:
     col_width.insert(0,150)
     df_fig = go.Figure(data=[go.Table(
     columnwidth = col_width,
-    header=dict(values=list(df.columns),
-                fill_color='paleturquoise',
+    header=dict(values=[f'<b>{col}</b>' for col in df.columns],
+                fill_color='royalblue',
+                font=dict(color='white', size=12),
                 align='left'),
     cells=dict(values=[df.iloc[:,i] for i in range(len(df.columns))],
                fill_color='lavender',
@@ -113,7 +114,7 @@ if show_checkbox:
     df_fig.update_layout(
         autosize=True,
         width=1200,
-        height=600
+        height=620
     )
     st.plotly_chart(df_fig)
     
