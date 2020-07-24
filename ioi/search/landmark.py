@@ -170,8 +170,10 @@ class Landmark():
             fig.add_trace(
                 go.Scattermapbox(
                     mode = "lines", 
+                    line = dict(width=1),
                     fill = "toself",
                     fillcolor = area_df_sub["color"].apply(lambda x: hex_to_rgb(x, 0.1)).tolist()[0],
+                    opacity=0.05,
                     legendgroup=area_df_sub["legendgroup"].values[0],
                     name=area_df_sub["legendgroup"].values[0],
         #             marker = dict(
