@@ -19,11 +19,10 @@ def read_data(csv):
     return df
 
 def match_input(text):
-    lookup = difflib.get_close_matches(text.lower(), df['PropName'].str.lower(), n=1, cutoff=0.6)
+    lookup = difflib.get_close_matches(text.lower(), df['PropName'].str.lower(), n=1, cutoff=0.8)
     if len(lookup)>0:
         return lookup[0].title()
     else:
-        st.write(f'No match found for {text}. Print provide more concise property name')
         return None
 
 df = read_data('condo.csv')
@@ -73,10 +72,13 @@ for i in range(prop_num):
     user_input[i] = st.sidebar.text_input(value=suggestions[i], label=f'Property {i+1}', key=i)
     prop_name[i]=None
     if user_input[i]:
-        match_name[i] = match_input(user_input[i]).title()
+        match_name[i] = match_input(user_input[i])
         if match_name[i]:
+            match_name[i] = match_name[i].title()
             region = df['region'][df['PropName']==match_name[i]].iloc[0]
             prop_name[i] = ' '.join([match_name[i], region])
+        else:
+            match_name[i] = 'Not Found'
             
 show_checkbox = st.sidebar.checkbox('Show Facts Comparison') 
 
@@ -93,15 +95,21 @@ def plot_map(search_term):
 
 search_term = []
 for i in range(prop_num):
-    if prop_name[i]:
-        search_term.append(prop_name[i])
+    if user_input[i]:
+        search_term.append(user_input[i])
         
 if show_checkbox:
     st.markdown('### Comparison Fact Sheets')
+    for key, value in match_name.items():
+        if value =='Not Found':
+            st.write(f'No match found for {user_input[i]}. Print provide more concise property name')
     
     df = df[df['PropName'].isin([value for key, value in match_name.items()])].set_index('PropName')
-    df[['LowPrice', 'HighPrice']] = df[['LowPrice', 'HighPrice']].applymap(lambda x: 'Not Available' if x==0 else x)
+    df[['LowPrice', 'HighPrice']] = df[['LowPrice', 'HighPrice']].applymap(lambda x: 'Not Available' if x==0 else x)     
     df = df.fillna('Not Available').T.reset_index()
+    for key, value in match_name.items():
+        if value =='Not Found':
+            df[user_input[key]] = 'Not Found'
     col_width = [1050//len(match_name)]*len(match_name)
     col_width.insert(0,150)
     df_fig = go.Figure(data=[go.Table(
