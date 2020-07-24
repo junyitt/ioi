@@ -97,9 +97,29 @@ for i in range(prop_num):
         search_term.append(prop_name[i])
         
 if show_checkbox:
-    df = df[df['PropName'].isin([value for key, value in match_name.items()])].set_index('PropName').T
-    st.dataframe(df)
+    st.markdown('### Comparison Fact Sheets')
+    df = df[df['PropName'].isin([value for key, value in match_name.items()])].set_index('PropName').T.reset_index()
+    col_width = [1050//len(match_name)]*len(match_name)
+    col_width.insert(0,150)
+    df_fig = go.Figure(data=[go.Table(
+    columnwidth = col_width,
+    header=dict(values=list(df.columns),
+                fill_color='paleturquoise',
+                align='left'),
+    cells=dict(values=[df.iloc[:,i] for i in range(len(df.columns))],
+               fill_color='lavender',
+               align='left'))
+    ])
+    df_fig.update_layout(
+        autosize=True,
+        width=1200,
+        height=600
+    )
+    st.plotly_chart(df_fig)
+    
+    
         
+st.markdown('### Map View')
 if len(search_term) > 0:
     st.write("Searching for: {}".format(", ".join(search_term)))
 
