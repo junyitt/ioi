@@ -98,7 +98,10 @@ for i in range(prop_num):
         
 if show_checkbox:
     st.markdown('### Comparison Fact Sheets')
-    df = df[df['PropName'].isin([value for key, value in match_name.items()])].set_index('PropName').T.reset_index()
+    
+    df = df[df['PropName'].isin([value for key, value in match_name.items()])].set_index('PropName')
+    df[['LowPrice', 'HighPrice']] = df[['LowPrice', 'HighPrice']].applymap(lambda x: 'Not Available' if x==0 else x)
+    df = df.fillna('Not Available').T.reset_index()
     col_width = [1050//len(match_name)]*len(match_name)
     col_width.insert(0,150)
     df_fig = go.Figure(data=[go.Table(
